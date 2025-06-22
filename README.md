@@ -18,7 +18,7 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Create a `.env.local` file in the root directory with the following content:
+Create a `.env` file in the root directory with the following content:
 
 ```
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -42,7 +42,7 @@ Visit [http://localhost:3000/auth](http://localhost:3000/auth) to begin authenti
 1. In your n8n instance, create a new workflow.
 2. Add a **Webhook** node:
    - Set the HTTP Method to `POST`.
-   - Copy the webhook URL and use it as `N8N_WEBHOOK_URL` in your `.env.local` file.
+   - Copy the webhook URL and use it as `N8N_WEBHOOK_URL` in your `.env` file.
 3. Add further nodes to process the incoming email data as needed (e.g., parse, store, notify).
 4. Activate the workflow.
 
