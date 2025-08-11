@@ -1,0 +1,196 @@
+{
+  "emails": [
+    {
+      "email_id": "198231af371fa8dd",
+      "snippet": "Thank you for requesting your Consolidated Account Statement by email through Mailback. This is a service provided for the very first time in India that consolidates your statement across Mutual Funds",
+      "from_mail": "donotreply@camsonline.com",
+      "subject": "Consolidated Account Statement - CAMS Mailback Request",
+      "date": "19 Jul 2025 20:03:34 +0530",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account",
+          "statement"
+        ],
+        "text_length": 200
+      },
+      "timestamp": "2025-08-11T21:13:14.547Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "1982317d25953506",
+      "snippet": "Dear Sir/Madam, Thank you for requesting your Consolidated Account Statement by email through Mailback. This is a service provided for the very first time in India that consolidates your statement",
+      "from_mail": "samfS@kfintech.com",
+      "subject": "Consolidated Account Statement - KFINTECH Mailback Request",
+      "date": "Sat, 19 Jul 2025 14:30:16 +0000",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account",
+          "statement"
+        ],
+        "text_length": 196
+      },
+      "timestamp": "2025-08-11T21:13:14.802Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "19807e7e19eae27b",
+      "snippet": "Zerodha Broking Limited logo Dear Devansh Gupta, Client ID: PTQ873 Attached is the quarterly equity account statement for the Quarter 1, 2025-2026. The quarterly equity account statement is a summary",
+      "from_mail": "no-reply-account-statement@reportsmailer.zerodha.net",
+      "subject": "Zerodha Broking Ltd: Quarterly Equity Account Statement for PTQ873 - Quarter 1, 2025-2026",
+      "date": "Mon, 14 Jul 2025 13:18:12 +0530",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account",
+          "statement"
+        ],
+        "text_length": 199
+      },
+      "timestamp": "2025-08-11T21:13:15.058Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "19782244838e700a",
+      "snippet": "INDmoney Dear Devansh Gupta Your bank account has been verified successfully. Now you can start transacting with the following bank account. Bank Name: STATE BANK OF INDIA Account No: XXXX1949 IFSC:",
+      "from_mail": "transactions@transactions.indmoney.com",
+      "subject": "Bank Account Verified successfully at INDmoney",
+      "date": "Wed, 18 Jun 2025 08:25:04 +0000",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account"
+        ],
+        "text_length": 198
+      },
+      "timestamp": "2025-08-11T21:13:15.341Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "197344187cd5b5dd",
+      "snippet": "Why Bank Tech Arms Could Be A Big Deal Right Now The establishment of tech arms within banks is not a novel concept but has gained significant relevance in today&#39;s landscape. Various banks, such as",
+      "from_mail": "newsletter@firsthand.akhilhanda.com",
+      "subject": "New Article: Why Bank Tech Arms Could Be A Big Deal Right Now",
+      "date": "Tue, 3 Jun 2025 05:26:38 +0000",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": null,
+      "timestamp": "2025-08-11T21:13:15.591Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "1972af0cc1c7d48d",
+      "snippet": "Account No: 38401281949 Name: Devansh Gupta Bank: SBI IFSC: SBIN0001976 UPI : devansh2102003@oksbi On Sun, 1 Jun, 2025, 10:00 am Manish Kulkarni, &lt;manishkulkarni885@gmail.com&gt; wrote: Hi Devansh",
+      "from_mail": "devansh2102003@gmail.com",
+      "subject": "Re: Bank account details",
+      "date": "Sun, 1 Jun 2025 15:31:53 +0530",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account"
+        ],
+        "text_length": 199
+      },
+      "timestamp": "2025-08-11T21:13:15.835Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "1972ab01d176870c",
+      "snippet": "Here are my bank details. Account No: 38401281949 Name: Devansh Gupta Bank: SBI IFSC: SBIN0001976 Thank you.",
+      "from_mail": "devansh2102003@gmail.com",
+      "subject": "Bank details",
+      "date": "Sun, 1 Jun 2025 14:21:13 +0530",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account"
+        ],
+        "text_length": 108
+      },
+      "timestamp": "2025-08-11T21:13:16.079Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "19729c1bf680636e",
+      "snippet": "Hi Devansh Please share your bank account details and UPI ID. Thanks",
+      "from_mail": "manishkulkarni885@gmail.com",
+      "subject": "Bank account details",
+      "date": "Sun, 1 Jun 2025 10:00:40 +0530",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account"
+        ],
+        "text_length": 68
+      },
+      "timestamp": "2025-08-11T21:13:16.329Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "1969b2ae5b7e0d8b",
+      "snippet": "Why Bank Tech Arms Could Be A Big Deal Right Now The establishment of tech arms within banks is not a novel concept but has gained significant relevance in today&#39;s landscape. Various banks, such as",
+      "from_mail": "devansh2102003@gmail.com",
+      "subject": "New Article: Why Bank Tech Arms Could Be A Big Deal Right Now",
+      "date": "Sun, 04 May 2025 12:00:00 +0000",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": null,
+      "timestamp": "2025-08-11T21:13:16.570Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    },
+    {
+      "email_id": "1954eea6a8699460",
+      "snippet": "Let me put it simply. Lien means bank holds a charge on your amount in SB account. Now, there could be scenarios like: 1. If you owe some money to the bank, either an EMI for the loan you&#39;ve tak…",
+      "from_mail": "curiosity-noreply@quora.com",
+      "subject": "More related to \"What is the lien or hold amount in an SBI bank transaction statement?\"",
+      "date": "Fri, 28 Feb 2025 23:35:39 +0000",
+      "account_details": {
+        "bankAccount": "3453252",
+        "creditCard": "2512"
+      },
+      "bank_details": {
+        "detected_keywords": [
+          "account"
+        ],
+        "text_length": 199
+      },
+      "timestamp": "2025-08-11T21:13:16.943Z",
+      "processed_at": "2025-08-11T21:13:16.943Z"
+    }
+  ],
+  "metadata": {
+    "total_emails": 10,
+    "account_info": {
+      "bankAccount": "3453252",
+      "creditCard": "2512",
+      "timestamp": "2025-08-11T21:13:16.943Z"
+    },
+    "fetch_date": "2025-08-11T21:13:16.943Z"
+  }
+}
