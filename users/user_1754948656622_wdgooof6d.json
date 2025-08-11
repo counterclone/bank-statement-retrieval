@@ -1,0 +1,15 @@
+{
+  "userId": "user_1754948656622_wdgooof6d",
+  "firstName": "pankaj",
+  "lastName": "Gupta2",
+  "email": "EFAED",
+  "bankAccounts": [],
+  "creditCards": [],
+  "identifiers": {
+    "panNumber": null,
+    "dateOfBirth": null,
+    "phoneNumber": "09022128064"
+  },
+  "createdAt": "2025-08-11T21:44:16.622Z",
+  "updatedAt": "2025-08-11T21:44:16.622Z"
+}

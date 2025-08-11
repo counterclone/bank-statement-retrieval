@@ -1,0 +1,15 @@
+{
+  "userId": "user_1754948491860_juhm6anmc",
+  "firstName": "pankaj",
+  "lastName": "Gupta",
+  "email": "pankaj9284@gmail.com",
+  "bankAccounts": [],
+  "creditCards": [],
+  "identifiers": {
+    "panNumber": null,
+    "dateOfBirth": null,
+    "phoneNumber": "09022128064"
+  },
+  "createdAt": "2025-08-11T21:41:31.860Z",
+  "updatedAt": "2025-08-11T21:41:31.860Z"
+}

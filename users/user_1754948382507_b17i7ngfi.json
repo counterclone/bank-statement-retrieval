@@ -1,0 +1,15 @@
+{
+  "userId": "user_1754948382507_b17i7ngfi",
+  "firstName": "Devansh",
+  "lastName": "Gupta",
+  "email": "devansh2102003@gmail.com",
+  "bankAccounts": [],
+  "creditCards": [],
+  "identifiers": {
+    "panNumber": null,
+    "dateOfBirth": null,
+    "phoneNumber": "09022128064"
+  },
+  "createdAt": "2025-08-11T21:39:42.508Z",
+  "updatedAt": "2025-08-11T21:39:42.509Z"
+}
