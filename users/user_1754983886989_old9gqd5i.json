@@ -1,0 +1,18 @@
+{
+  "userId": "user_1754983886989_old9gqd5i",
+  "firstName": "Pankaj",
+  "lastName": "Gupta",
+  "email": "pankaj@gmail.com",
+  "bankAccounts": [],
+  "creditCards": [],
+  "identifiers": {
+    "panNumber": "DUXPG1609H",
+    "dateOfBirth": "1997-01-01",
+    "phoneNumber": "09022128064"
+  },
+  "createdAt": "2025-08-12T07:31:26.989Z",
+  "updatedAt": "2025-08-13T09:24:24.053Z",
+  "panNumber": "DUXPG1609H",
+  "dateOfBirth": "1997-01-01",
+  "phoneNumber": "09022128064"
+}

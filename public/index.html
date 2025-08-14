@@ -409,6 +409,42 @@
       border-bottom-color: #667eea;
     }
 
+    /* Sub-tab styles */
+    .sub-tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sub-tab-button {
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      background: #f8f9fa;
+      color: #333;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .sub-tab-button:hover {
+      background: #e9ecef;
+    }
+
+    .sub-tab-button.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .sub-tab-content {
+      display: block;
+    }
+
+    .sub-tab-content.hidden {
+      display: none;
+    }
+
     .tab-content {
       display: none;
     }
@@ -551,6 +587,24 @@
       align-items: center;
       justify-content: center;
     }
+
+    /* Radio button styling */
+    input[type="radio"] {
+      margin-right: 8px;
+      transform: scale(1.2);
+    }
+
+    input[type="radio"] + label {
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .fetch-method-group {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -565,8 +619,9 @@
         <div class="tab-buttons">
           <button class="tab-button active" onclick="showTab('setup')">Profile Setup</button>
           <button class="tab-button" onclick="showTab('profiles')">Saved Profiles</button>
-          <button class="tab-button" onclick="showTab('fetch')">Fetch Data</button>
-          <button class="tab-button" onclick="showTab('view')">View Data</button>
+          <button class="tab-button" onclick="showTab('fetch')">Fetch & Process Data</button>
+          <button class="tab-button" onclick="showTab('view')">View Transactions</button>
+          <button class="tab-button" onclick="showTab('pdfs')">PDF Attachments</button>
         </div>
       </div>
 
@@ -656,11 +711,20 @@
         </div>
       </div>
 
-      <!-- Fetch Data Tab -->
+      <!-- Fetch & Process Data Tab -->
       <div id="fetchTab" class="tab-content">
         <div class="form-section">
-          <h2>Fetch Financial Data</h2>
-          <p>Choose what type of data you want to fetch from your emails</p>
+          <h2>Fetch & Process Financial Data</h2>
+          <p>Fetch emails and automatically process them with Gemini AI for structured transaction data</p>
+          
+          <div id="fetchPrerequisites" class="status info" style="display: none;">
+            <strong>Before fetching data:</strong>
+            <ol style="margin-top: 10px; margin-left: 20px;">
+              <li>Set up your profile in the "Profile Setup" tab</li>
+              <li>Click "Subscribe with Google" to authenticate</li>
+              <li>Save your profile</li>
+            </ol>
+          </div>
           
           <div class="form-group">
             <label for="queryType">Data Type</label>
@@ -672,14 +736,59 @@
             </select>
           </div>
 
+          <div class="form-group">
+            <label for="emailType">Email Type</label>
+            <select id="emailType" class="input-field">
+              <option value="both">Both Transaction Alerts & Statements</option>
+              <option value="transaction_alerts">Transaction Alerts Only</option>
+              <option value="periodic_statements">Periodic Statements Only</option>
+            </select>
+          </div>
+
+          <div class="form-group fetch-method-group">
+            <label style="font-weight: 600; margin-bottom: 10px; display: block;">Fetch Method</label>
+            <div style="margin-top: 10px;">
+              <label style="display: inline-block; margin-right: 20px;">
+                <input type="radio" name="fetchMethod" value="count" checked onchange="toggleFetchMethod()">
+                By Number of Emails
+              </label>
+              <label style="display: inline-block;">
+                <input type="radio" name="fetchMethod" value="date" onchange="toggleFetchMethod()">
+                By Date Range
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" id="maxEmailsGroup">
+            <label for="maxEmails">Maximum Number of Emails</label>
+            <input type="number" id="maxEmails" class="input-field" placeholder="30" min="1" max="100" value="30">
+            <small style="color: #666; font-size: 0.9em;">Batched processing allows up to 100 emails efficiently (10 emails per API call)</small>
+          </div>
+
+          <div class="form-group" id="dateRangeGroup" style="display: none;">
+            <label for="fromDate">From Date</label>
+            <input type="date" id="fromDate" class="input-field">
+          </div>
+
+          <div class="form-group" id="toDateGroup" style="display: none;">
+            <label for="toDate">To Date</label>
+            <input type="date" id="toDate" class="input-field">
+          </div>
+
           <div class="button-group">
-            <button class="btn btn-secondary" id="fetchTransactionsBtn" onclick="fetchTransactions()">
-              <span class="btn-text">Fetch Transactions</span>
+            <button class="btn btn-success" id="fetchAndProcessBtn" onclick="fetchAndProcessData()">
+              <span class="btn-text">Fetch & Process with Gemini AI</span>
               <span class="spinner" style="display: none;"></span>
             </button>
             <button class="btn btn-warning" id="fetchLegacyBtn" onclick="fetchLegacyEmails()">
-              <span class="btn-text">Fetch Legacy Emails</span>
+              <span class="btn-text">Fetch Legacy Emails (No AI)</span>
               <span class="spinner" style="display: none;"></span>
+            </button>
+          </div>
+          
+          <div class="button-group" style="margin-top: 20px; border-top: 1px solid #e1e5e9; padding-top: 20px;">
+            <button class="btn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);" onclick="deleteAllData()">
+              <span class="btn-text">🗑️ Delete All Data</span>
             </button>
           </div>
 
@@ -687,27 +796,104 @@
         </div>
       </div>
 
-      <!-- View Data Tab -->
+      <!-- View Transactions Tab -->
       <div id="viewTab" class="tab-content">
         <div class="form-section">
-          <h2>Stored Data Files</h2>
-          <p>View and analyze your fetched financial data</p>
+          <h2>View Data</h2>
+          <p>View and analyze your email data and processed transactions</p>
+          
+          <!-- Sub-tabs for different data types -->
+          <div class="sub-tab-buttons" style="margin-bottom: 20px;">
+            <button class="sub-tab-button active" onclick="showSubTab('pureData')">Pure Data (Raw Emails)</button>
+            <button class="sub-tab-button" onclick="showSubTab('geminiData')">Gemini Processed Data</button>
+          </div>
+
+          <!-- Pure Data Sub-tab -->
+          <div id="pureDataSubTab" class="sub-tab-content">
+            <h3>Raw Email Data</h3>
+            <p>View original email data from the data folder</p>
+            
+            <div class="form-group">
+              <label for="pureDataFromDate">From Date (Optional)</label>
+              <input type="date" id="pureDataFromDate" class="input-field">
+            </div>
+
+            <div class="form-group">
+              <label for="pureDataToDate">To Date (Optional)</label>
+              <input type="date" id="pureDataToDate" class="input-field">
+            </div>
           
           <div class="button-group">
-            <button class="btn btn-success" id="loadDataBtn" onclick="loadStoredData()">
-              <span class="btn-text">Load Stored Data</span>
+              <button class="btn btn-secondary" id="loadPureDataBtn" onclick="loadPureData()">
+                <span class="btn-text">Load Raw Email Data</span>
               <span class="spinner" style="display: none;"></span>
             </button>
           </div>
 
-          <div id="dataSection" class="data-section" style="display: none;">
-            <div id="filesList" class="files-list"></div>
-            
-            <div id="dataDisplay" class="data-display" style="display: none;">
-              <h3 id="selectedFileName"></h3>
-              <div id="emailsList"></div>
+            <div id="pureDataSection" class="data-section" style="display: none;">
+              <div id="pureDataFilesList" class="files-list"></div>
+              
+              <div id="pureDataDisplay" class="data-display" style="display: none;">
+                <h3 id="selectedPureDataFileName"></h3>
+                <div id="pureDataList"></div>
+          </div>
+        </div>
+      </div>
+
+          <!-- Gemini Processed Data Sub-tab -->
+          <div id="geminiDataSubTab" class="sub-tab-content hidden">
+            <h3>Gemini AI Processed Transactions</h3>
+            <p>View structured transaction data processed by Gemini AI</p>
+          
+          <div class="form-group">
+              <label for="geminiDataFromDate">From Date (Optional)</label>
+              <input type="date" id="geminiDataFromDate" class="input-field">
+          </div>
+
+          <div class="form-group">
+              <label for="geminiDataToDate">To Date (Optional)</label>
+              <input type="date" id="geminiDataToDate" class="input-field">
+          </div>
+
+          <div class="button-group">
+              <button class="btn btn-success" id="loadGeminiDataBtn" onclick="loadGeminiData()">
+                <span class="btn-text">Load Gemini Processed Data</span>
+              <span class="spinner" style="display: none;"></span>
+            </button>
+          </div>
+
+            <div id="geminiDataSection" class="data-section" style="display: none;">
+              <div id="geminiDataFilesList" class="files-list"></div>
+              
+              <div id="geminiDataDisplay" class="data-display" style="display: none;">
+                <h3 id="selectedGeminiDataFileName"></h3>
+                <div id="geminiDataList"></div>
             </div>
           </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- PDF Attachments Tab -->
+      <div id="pdfsTab" class="tab-content">
+        <div class="form-section">
+          <h2>PDF Attachments</h2>
+          <p>View and download PDF statements and attachments from your emails</p>
+          
+          <div class="button-group">
+            <button class="btn btn-success" id="loadPDFsBtn" onclick="loadPDFAttachments()">
+              <span class="btn-text">Load PDF Attachments</span>
+              <span class="spinner" style="display: none;"></span>
+            </button>
+          </div>
+
+          <div id="pdfsSection" class="data-section" style="display: none;">
+            <div id="pdfsList" class="files-list"></div>
+          </div>
+
+          <div id="pdfsStatus" class="status" style="display: none;"></div>
         </div>
       </div>
     </div>
@@ -735,6 +921,16 @@
       
       // Add active class to clicked button
       event.target.classList.add('active');
+      
+      // Show/hide prerequisites for fetch tab
+      if (tabName === 'fetch') {
+        const prerequisitesDiv = document.getElementById('fetchPrerequisites');
+        if (!currentUserId) {
+          prerequisitesDiv.style.display = 'block';
+        } else {
+          prerequisitesDiv.style.display = 'none';
+        }
+      }
     }
 
     // Add bank account
@@ -886,6 +1082,8 @@
           showStatus(isUpdate ? 'Profile updated successfully!' : 'Profile saved successfully! You can now fetch transactions.', 'success');
           // Switch to fetch tab
           showTab('fetch');
+          // Hide prerequisites message
+          document.getElementById('fetchPrerequisites').style.display = 'none';
         } else {
           showStatus(data.error || (isUpdate ? 'Failed to update profile' : 'Failed to save profile'), 'error');
         }
@@ -986,27 +1184,65 @@
       });
     }
 
-    // Load stored data function
-    function loadStoredData() {
-      const btn = document.getElementById('loadDataBtn');
+    // Show sub-tab function
+    function showSubTab(subTabName) {
+      console.log(`[DEBUG] showSubTab called with: ${subTabName}`);
+      
+      // Hide all sub-tab contents
+      document.querySelectorAll('.sub-tab-content').forEach(content => {
+        content.classList.add('hidden');
+        console.log(`[DEBUG] Hiding sub-tab content: ${content.id}`);
+      });
+      
+      // Remove active class from all sub-tab buttons
+      document.querySelectorAll('.sub-tab-button').forEach(btn => {
+        btn.classList.remove('active');
+        console.log(`[DEBUG] Removing active class from button: ${btn.textContent}`);
+      });
+      
+      // Show selected sub-tab content
+      const selectedContent = document.getElementById(subTabName + 'SubTab');
+      console.log(`[DEBUG] Looking for content with ID: ${subTabName}SubTab`);
+      if (selectedContent) {
+        selectedContent.classList.remove('hidden');
+        console.log(`[DEBUG] Showing sub-tab content: ${selectedContent.id}`);
+      } else {
+        console.error(`[DEBUG] Could not find sub-tab content with ID: ${subTabName}SubTab`);
+      }
+      
+      // Add active class to selected button
+      const selectedButton = document.querySelector(`[onclick="showSubTab('${subTabName}')"]`);
+      console.log(`[DEBUG] Looking for button with onclick="showSubTab('${subTabName}')"`);
+      if (selectedButton) {
+        selectedButton.classList.add('active');
+        console.log(`[DEBUG] Added active class to button: ${selectedButton.textContent}`);
+      } else {
+        console.error(`[DEBUG] Could not find button with onclick="showSubTab('${subTabName}')"`);
+      }
+    }
+
+    // Load pure data function (raw emails)
+    function loadPureData() {
+      const btn = document.getElementById('loadPureDataBtn');
       const btnText = btn.querySelector('.btn-text');
       const spinner = btn.querySelector('.spinner');
       
       // Show spinner and disable button
       btn.disabled = true;
-      btnText.textContent = 'Loading stored data...';
+      btnText.textContent = 'Loading raw email data...';
       spinner.style.display = 'inline-block';
       
-      showStatus('Loading stored data...', 'info', 'fetchStatus');
+      showStatus('Loading raw email data...', 'info', 'fetchStatus');
       
+      // Load raw email data from data folder
       fetch('/api/stored-data')
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            displayFilesList(data.files);
-            showStatus(`Loaded ${data.files.length} stored files`, 'success', 'fetchStatus');
+            displayPureDataFilesList(data.files);
+            showStatus(`Loaded ${data.files.length} raw email files`, 'success', 'fetchStatus');
           } else {
-            showStatus(data.error || 'Failed to load stored data', 'error', 'fetchStatus');
+            showStatus(data.error || 'Failed to load raw email data', 'error', 'fetchStatus');
           }
         })
         .catch(error => {
@@ -1015,12 +1251,101 @@
         .finally(() => {
           // Hide spinner and re-enable button
           btn.disabled = false;
-          btnText.textContent = 'Load Stored Data';
+          btnText.textContent = 'Load Raw Email Data';
           spinner.style.display = 'none';
         });
     }
 
-    // Display files list
+    // Load Gemini processed data function
+    function loadGeminiData() {
+      const btn = document.getElementById('loadGeminiDataBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner');
+      
+      // Show spinner and disable button
+      btn.disabled = true;
+      btnText.textContent = 'Loading Gemini processed data...';
+      spinner.style.display = 'inline-block';
+      
+      showStatus('Loading Gemini processed data...', 'info', 'fetchStatus');
+      
+      // Load Gemini processed transactions
+      fetch('/api/transactions-hub')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Filter for Gemini processed files
+            const geminiFiles = data.files
+              .filter(file => file.filename.startsWith('gemini_transactions_'))
+              .map(file => ({
+                ...file,
+                filename: file.filename.replace('gemini_transactions_', 'Transactions - ').replace('.json', '')
+              }));
+            
+            displayGeminiDataFilesList(geminiFiles);
+            showStatus(`Loaded ${geminiFiles.length} Gemini processed files`, 'success', 'fetchStatus');
+          } else {
+            showStatus(data.error || 'Failed to load Gemini data', 'error', 'fetchStatus');
+          }
+        })
+        .catch(error => {
+          showStatus('Error: ' + error.message, 'error', 'fetchStatus');
+        })
+        .finally(() => {
+          // Hide spinner and re-enable button
+          btn.disabled = false;
+          btnText.textContent = 'Load Gemini Processed Data';
+          spinner.style.display = 'none';
+        });
+    }
+
+    // Display pure data files list
+    function displayPureDataFilesList(files) {
+      const filesListDiv = document.getElementById('pureDataFilesList');
+      const dataSection = document.getElementById('pureDataSection');
+      
+      if (files.length === 0) {
+        filesListDiv.innerHTML = '<div class="no-data">No raw email files found</div>';
+      } else {
+        filesListDiv.innerHTML = files.map(file => `
+          <div class="file-card" onclick="loadPureDataContent('${file.filename}')">
+            <div class="file-name">${file.filename}</div>
+            <div class="file-info">
+              <div>Created: ${new Date(file.created).toLocaleString()}</div>
+              <div>Modified: ${new Date(file.modified).toLocaleString()}</div>
+            </div>
+            <div class="file-size">${formatFileSize(file.size)}</div>
+          </div>
+        `).join('');
+      }
+      
+      dataSection.style.display = 'block';
+    }
+
+    // Display Gemini data files list
+    function displayGeminiDataFilesList(files) {
+      const filesListDiv = document.getElementById('geminiDataFilesList');
+      const dataSection = document.getElementById('geminiDataSection');
+      
+      if (files.length === 0) {
+        filesListDiv.innerHTML = '<div class="no-data">No Gemini processed files found</div>';
+      } else {
+        filesListDiv.innerHTML = files.map(file => `
+          <div class="file-card" onclick="loadGeminiDataContent('${file.filename}')">
+            <div class="file-name">${file.filename}</div>
+            <div class="file-info">
+              <div>Created: ${new Date(file.created).toLocaleString()}</div>
+              <div>Modified: ${new Date(file.modified).toLocaleString()}</div>
+            </div>
+            <div class="file-size">${formatFileSize(file.size)}</div>
+          </div>
+        `).join('');
+      }
+      
+      dataSection.style.display = 'block';
+    }
+
+    // Display files list (legacy function for backward compatibility)
     function displayFilesList(files) {
       const filesListDiv = document.getElementById('filesList');
       const dataSection = document.getElementById('dataSection');
@@ -1043,15 +1368,15 @@
       dataSection.style.display = 'block';
     }
 
-    // Load file content
-    function loadFileContent(filename) {
+    // Load pure data content (raw emails)
+    function loadPureDataContent(filename) {
       showStatus(`Loading ${filename}...`, 'info', 'fetchStatus');
       
       fetch(`/api/stored-data/${filename}`)
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            displayEmailData(filename, data.data);
+            displayPureDataContent(filename, data.data);
             showStatus(`Loaded ${filename}`, 'success', 'fetchStatus');
           } else {
             showStatus(data.error || 'Failed to load file content', 'error', 'fetchStatus');
@@ -1062,68 +1387,161 @@
         });
     }
 
-    // Display email data
-    function displayEmailData(filename, data) {
-      const selectedFileName = document.getElementById('selectedFileName');
-      const emailsList = document.getElementById('emailsList');
-      const dataDisplay = document.getElementById('dataDisplay');
+    // Load Gemini data content
+    function loadGeminiDataContent(filename) {
+      showStatus(`Loading ${filename}...`, 'info', 'fetchStatus');
+      
+      // Convert display filename back to actual filename
+      // Display: "Transactions - both_2025-08-13T10-59-32-140Z"
+      // Actual: "gemini_transactions_both_2025-08-13T10-59-32-140Z.json"
+      const actualFilename = `gemini_transactions_${filename.replace('Transactions - ', '')}.json`;
+      
+      console.log(`[DEBUG] Converting display filename: "${filename}" to actual filename: "${actualFilename}"`);
+      
+      fetch(`/api/transactions-hub/${actualFilename}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            displayGeminiDataContent(filename, data.data);
+            showStatus(`Loaded ${filename}`, 'success', 'fetchStatus');
+          } else {
+            showStatus(data.error || 'Failed to load file content', 'error', 'fetchStatus');
+          }
+        })
+        .catch(error => {
+          console.error(`[DEBUG] Error loading file: ${error.message}`);
+          showStatus('Error: ' + error.message, 'error', 'fetchStatus');
+        });
+    }
+
+    // Load file content (legacy function for backward compatibility)
+    function loadFileContent(filename) {
+      showStatus(`Loading ${filename}...`, 'info', 'fetchStatus');
+      
+      // Convert display filename back to actual filename
+      const actualFilename = `gemini_transactions_${filename.replace('Transactions - ', '')}.json`;
+      
+      fetch(`/api/transactions-hub/${actualFilename}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            displayTransactionData(filename, data.data);
+            showStatus(`Loaded ${filename}`, 'success', 'fetchStatus');
+          } else {
+            showStatus(data.error || 'Failed to load file content', 'error', 'fetchStatus');
+          }
+        })
+        .catch(error => {
+          showStatus('Error: ' + error.message, 'error', 'fetchStatus');
+        });
+    }
+
+    // Display pure data content (raw emails)
+    function displayPureDataContent(filename, data) {
+      const selectedFileName = document.getElementById('selectedPureDataFileName');
+      const pureDataList = document.getElementById('pureDataList');
+      const dataDisplay = document.getElementById('pureDataDisplay');
       
       selectedFileName.textContent = filename;
       
       if (data.emails && data.emails.length > 0) {
-        emailsList.innerHTML = data.emails.map(email => `
-          <div class="email-item">
-            <div class="email-header">
-              <div class="email-subject">${email.subject || 'No Subject'}</div>
-              <div class="email-date">${formatDate(email.date)}</div>
+        pureDataList.innerHTML = `
+          <div class="transaction-summary">
+            <h4>Raw Email Data</h4>
+            <div class="detail-row">
+              <span class="detail-label">Total Emails:</span>
+              <span class="detail-value">${data.emails.length}</span>
             </div>
-            <div class="email-from">From: ${email.from_mail || 'Unknown'}</div>
-            <div class="email-snippet">${email.snippet || 'No content'}</div>
-            
-            ${email.queryType ? `<div class="detail-row"><span class="detail-label">Query Type:</span><span class="detail-value">${email.queryType}</span></div>` : ''}
+            <div class="detail-row">
+              <span class="detail-label">Fetch Date:</span>
+              <span class="detail-value">${formatDate(data.fetchDate)}</span>
+            </div>
+          </div>
+          <div class="emails-list">
+            ${data.emails.map(email => `
+              <div class="email-item" style="background: white; border: 1px solid #e1e5e9; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                <div class="email-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div class="email-subject" style="font-weight: 600; color: #333;">${email.subject || 'No Subject'}</div>
+                  <div class="email-date" style="color: #666; font-size: 0.9em;">${formatDate(email.date)}</div>
+                </div>
+                <div class="email-from" style="color: #666; margin-bottom: 8px;">From: ${email.from_mail || 'Unknown'}</div>
+                <div class="email-snippet" style="color: #333; line-height: 1.5;">${email.snippet || 'No content'}</div>
+                
+                ${email.queryType ? `<div class="detail-row" style="margin-top: 8px;"><span class="detail-label">Query Type:</span><span class="detail-value">${email.queryType}</span></div>` : ''}
             
             ${email.accountMapping && email.accountMapping.bankAccount ? `
-              <div class="detail-row">
+                  <div class="detail-row" style="margin-top: 8px;">
                 <span class="detail-label">Mapped Bank Account:</span>
                 <span class="detail-value">${email.accountMapping.bankAccount.bankName} - ${email.accountMapping.bankAccount.accountNumber}</span>
               </div>
             ` : ''}
             
             ${email.accountMapping && email.accountMapping.creditCard ? `
-              <div class="detail-row">
+                  <div class="detail-row" style="margin-top: 8px;">
                 <span class="detail-label">Mapped Credit Card:</span>
                 <span class="detail-value">${email.accountMapping.creditCard.provider} - ****${email.accountMapping.creditCard.cardNumber.slice(-4)}</span>
               </div>
             ` : ''}
             
             ${email.transactionDetails ? `
-              <div class="transaction-details">
-                <div class="transaction-type ${email.transactionDetails.type}">${email.transactionDetails.type ? email.transactionDetails.type.toUpperCase() : 'TRANSACTION'}</div>
-                ${email.transactionDetails.amount ? `<div class="amount">₹${email.transactionDetails.amount.toLocaleString()}</div>` : ''}
-                ${email.transactionDetails.merchant ? `<div class="merchant">Merchant: ${email.transactionDetails.merchant}</div>` : ''}
+                  <div class="transaction-details" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                    <div class="transaction-type ${email.transactionDetails.type}" style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; background: ${email.transactionDetails.type === 'credit' ? '#27ae60' : email.transactionDetails.type === 'debit' ? '#e74c3c' : '#95a5a6'}; margin-bottom: 5px;">
+                      ${email.transactionDetails.type ? email.transactionDetails.type.toUpperCase() : 'TRANSACTION'}
+                    </div>
+                    ${email.transactionDetails.amount ? `<div class="amount" style="font-weight: bold; color: #333;">₹${email.transactionDetails.amount.toLocaleString()}</div>` : ''}
+                    ${email.transactionDetails.merchant ? `<div class="merchant" style="color: #666;">Merchant: ${email.transactionDetails.merchant}</div>` : ''}
                 ${email.transactionDetails.keywords && email.transactionDetails.keywords.length > 0 ? `
-                  <div class="keywords">
-                    ${email.transactionDetails.keywords.map(keyword => `<span class="keyword">${keyword}</span>`).join('')}
+                      <div class="keywords" style="margin-top: 5px;">
+                        ${email.transactionDetails.keywords.map(keyword => `<span class="keyword" style="display: inline-block; background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-right: 5px; margin-bottom: 3px;">${keyword}</span>`).join('')}
                   </div>
                 ` : ''}
               </div>
             ` : ''}
             
             ${email.statementDetails ? `
-              <div class="statement-details">
-                <div class="detail-label">Statement Details:</div>
-                ${email.statementDetails.statementType ? `<div>Type: ${email.statementDetails.statementType}</div>` : ''}
-                ${email.statementDetails.period ? `<div>Period: ${email.statementDetails.period}</div>` : ''}
+                  <div class="statement-details" style="margin-top: 10px; padding: 10px; background: #e8f4fd; border-radius: 5px;">
+                    <div class="detail-label" style="font-weight: 600; margin-bottom: 5px;">Statement Details:</div>
+                    ${email.statementDetails.statementType ? `<div style="margin-bottom: 3px;">Type: ${email.statementDetails.statementType}</div>` : ''}
+                    ${email.statementDetails.period ? `<div style="margin-bottom: 3px;">Period: ${email.statementDetails.period}</div>` : ''}
                 ${email.statementDetails.passwordHint ? `
-                  <div class="password-hint">Password Hint: ${email.statementDetails.passwordHint}</div>
+                      <div class="password-hint" style="margin-top: 5px; padding: 5px; background: #fff3cd; border-radius: 3px; font-size: 0.9em;">
+                        Password Hint: ${email.statementDetails.passwordHint}
+                      </div>
                 ` : ''}
                 ${email.statementDetails.identifiers && email.statementDetails.identifiers.length > 0 ? `
-                  <div>Required Identifiers: ${email.statementDetails.identifiers.join(', ')}</div>
+                      <div style="margin-top: 5px;">Required Identifiers: ${email.statementDetails.identifiers.join(', ')}</div>
                 ` : ''}
               </div>
             ` : ''}
             
-            <div class="email-details">
+            ${email.pdfAttachments && email.pdfAttachments.length > 0 ? `
+                  <div class="pdf-attachments" style="margin-top: 10px;">
+                    <div class="detail-label" style="font-weight: 600; margin-bottom: 5px;">PDF Attachments (${email.pdfAttachments.length}):</div>
+                ${email.pdfAttachments.map(pdf => `
+                  <div class="pdf-item" style="background: #e8f4fd; border-radius: 8px; padding: 10px; margin: 5px 0;">
+                    <div style="font-weight: 500; color: #2c3e50;">${pdf.originalFilename || pdf.filename}</div>
+                    <div style="font-size: 0.9em; color: #666;">Size: ${formatFileSize(pdf.size)}</div>
+                    ${pdf.storedFilename ? `
+                      <div class="button-group" style="margin-top: 8px;">
+                        <button class="btn btn-secondary" onclick="viewPDF('${pdf.storedFilename}')" style="font-size: 0.8em; padding: 5px 10px;">
+                          View PDF
+                        </button>
+                        <button class="btn btn-success" onclick="downloadPDF('${pdf.storedFilename}')" style="font-size: 0.8em; padding: 5px 10px;">
+                          Download
+                        </button>
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+            
+                <div class="email-details" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e1e5e9;">
               <div class="detail-row">
                 <span class="detail-label">Email ID:</span>
                 <span class="detail-value">${email.email_id}</span>
@@ -1134,9 +1552,271 @@
               </div>
             </div>
           </div>
-        `).join('');
+            `).join('')}
+          </div>
+        `;
       } else {
-        emailsList.innerHTML = '<div class="no-data">No emails found in this file</div>';
+        pureDataList.innerHTML = '<div class="no-data">No emails found in this file</div>';
+      }
+      
+      dataDisplay.style.display = 'block';
+    }
+
+    // Display Gemini data content
+    function displayGeminiDataContent(filename, data) {
+      const selectedFileName = document.getElementById('selectedGeminiDataFileName');
+      const geminiDataList = document.getElementById('geminiDataList');
+      const dataDisplay = document.getElementById('geminiDataDisplay');
+      
+      selectedFileName.textContent = filename;
+      
+      if (data.transactions && data.transactions.length > 0) {
+        try {
+        // Separate transactions and statements
+        const transactions = data.transactions.filter(item => item.txn_date || item.credit_debit);
+        const statements = data.transactions.filter(item => item.statement_type || item.type === 'statement');
+        
+        geminiDataList.innerHTML = `
+          <div class="transaction-summary">
+            <h4>Gemini AI Processed Data</h4>
+            <div class="detail-row">
+              <span class="detail-label">Total Records:</span>
+              <span class="detail-value">${data.transactions.length}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Transactions:</span>
+              <span class="detail-value">${transactions.length}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Statements:</span>
+              <span class="detail-value">${statements.length}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Emails Processed:</span>
+              <span class="detail-value">${data.metadata.total_emails}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Processing Date:</span>
+              <span class="detail-value">${formatDate(data.metadata.processed_at)}</span>
+            </div>
+            ${data.metadata.userProfile ? `
+              <div class="detail-row">
+                <span class="detail-label">User:</span>
+                <span class="detail-value">${data.metadata.userProfile.firstName} ${data.metadata.userProfile.lastName}</span>
+              </div>
+            ` : ''}
+            ${data.metadata.balance && data.metadata.balance.amount ? `
+              <div class="detail-row">
+                <span class="detail-label">Current Balance:</span>
+                <span class="detail-value" style="font-weight: bold; color: #27ae60;">₹${data.metadata.balance.amount.toLocaleString()}</span>
+                <span style="color: #666; font-size: 0.9em;">(${data.metadata.balance.source})</span>
+              </div>
+            ` : ''}
+            ${data.metadata.geminiProcessingSuccess !== undefined ? `
+              <div class="detail-row">
+                <span class="detail-label">Processing Method:</span>
+                <span class="detail-value" style="color: ${data.metadata.geminiProcessingSuccess ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
+                  ${data.metadata.geminiProcessingSuccess ? 'Gemini AI' : 'Basic Processing (Rate Limited)'}
+                </span>
+              </div>
+            ` : ''}
+          </div>
+          <div class="transactions-table">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+              <thead>
+                <tr style="background: #667eea; color: white;">
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Type</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Date</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Details</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Party/Description</th>
+                  <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Amount</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Source</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">PDF Info</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.transactions.map(item => {
+                  if (item.txn_date || item.credit_debit) {
+                    // Transaction row
+                    return `
+                      <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <span class="transaction-type ${item.credit_debit || 'unknown'}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; background: ${(item.credit_debit || 'unknown') === 'credit' ? '#27ae60' : (item.credit_debit || 'unknown') === 'debit' ? '#e74c3c' : '#95a5a6'};">
+                            ${(item.credit_debit || 'UNKNOWN').toUpperCase()}
+                          </span>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${formatDate(item.txn_date)}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <div>${item.narration || 'Transaction'}</div>
+                          ${item.utr_number ? `<small style="color: #666;">UTR: ${item.utr_number}</small>` : ''}
+                          ${item.available_balance ? `<div style="color: #27ae60; font-weight: bold; margin-top: 4px;">Balance: ₹${item.available_balance.toLocaleString()}</div>` : ''}
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${item.rcvd_from_paid_to || '-'}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: right; font-weight: bold;">
+                          ${item.txn_amount > 0 ? `₹${item.txn_amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <span style="padding: 2px 6px; border-radius: 4px; font-size: 0.7em; background: #ecf0f1; color: #2c3e50;">
+                            ${item.source || 'unknown'}
+                          </span>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          ${item.pdf_attached ? 
+                            `<span style="color: #27ae60; font-weight: bold;">✓ PDF</span><br><small style="color: #666;">${item.pdf_password_protected ? 'Protected' : 'Open'}</small><br>${item.pdf_password ? `<span style="font-family: monospace; font-size: 0.8em; background: #f8f9fa; padding: 2px 4px; border-radius: 3px;">${item.pdf_password}</span>` : ''}` : 
+                            '<span style="color: #95a5a6;">No PDF</span>'
+                          }
+                        </td>
+                      </tr>
+                    `;
+                  } else if (item.statement_type || item.type === 'statement') {
+                    // Statement row
+                    return `
+                      <tr style="border-bottom: 1px solid #ddd; background: #f8f9fa;">
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; background: #9b59b6;">
+                            STATEMENT
+                          </span>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${formatDate(item.statement_date)}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <div style="font-weight: bold;">${item.statement_type || 'Statement'}</div>
+                          ${item.pdf_filename ? `<small style="color: #666;">File: ${item.pdf_filename}</small>` : ''}
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">-</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <span style="padding: 2px 6px; border-radius: 4px; font-size: 0.7em; background: #ecf0f1; color: #2c3e50;">
+                            ${item.source || 'gmail-periodic-stmt'}
+                          </span>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          ${item.pdf_attached ? 
+                            `<span style="color: #27ae60; font-weight: bold;">✓ PDF</span><br><small style="color: #666;">${item.pdf_password_protected ? 'Protected' : 'Open'}</small><br>${item.pdf_password ? `<span style="font-family: monospace; font-size: 0.8em; background: #f8f9fa; padding: 2px 4px; border-radius: 3px;">${item.pdf_password}</span>` : ''}` : 
+                            '<span style="color: #95a5a6;">No PDF</span>'
+                          }
+                        </td>
+                      </tr>
+                    `;
+                  } else {
+                    // Fallback for unknown type
+                    return `
+                      <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="padding: 12px; border: 1px solid #ddd;">
+                          <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; background: #95a5a6;">
+                            UNKNOWN
+                          </span>
+                        </td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${formatDate(item.txn_date || item.statement_date || new Date())}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">${item.narration || 'Unknown'}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">-</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                      </tr>
+                    `;
+                  }
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+              } catch (error) {
+          console.error('Error displaying Gemini data:', error);
+          geminiDataList.innerHTML = '<div class="no-data">Error displaying data. Please check console for details.</div>';
+        }
+      } else {
+        geminiDataList.innerHTML = '<div class="no-data">No transactions found in this file</div>';
+      }
+      
+      dataDisplay.style.display = 'block';
+    }
+
+    // Display transaction data (legacy function for backward compatibility)
+    function displayTransactionData(filename, data) {
+      const selectedFileName = document.getElementById('selectedFileName');
+      const transactionsList = document.getElementById('transactionsList');
+      const dataDisplay = document.getElementById('dataDisplay');
+      
+      selectedFileName.textContent = filename;
+      
+      if (data.transactions && data.transactions.length > 0) {
+        transactionsList.innerHTML = `
+          <div class="transaction-summary">
+            <h4>Gemini AI Processed Transactions</h4>
+            <div class="detail-row">
+              <span class="detail-label">Total Transactions:</span>
+              <span class="detail-value">${data.transactions.length}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Emails Processed:</span>
+              <span class="detail-value">${data.metadata.total_emails}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Processing Date:</span>
+              <span class="detail-value">${formatDate(data.metadata.processed_at)}</span>
+            </div>
+            ${data.metadata.userProfile ? `
+              <div class="detail-row">
+                <span class="detail-label">User:</span>
+                <span class="detail-value">${data.metadata.userProfile.firstName} ${data.metadata.userProfile.lastName}</span>
+              </div>
+            ` : ''}
+            ${data.metadata.balance && data.metadata.balance.amount ? `
+              <div class="detail-row">
+                <span class="detail-label">Current Balance:</span>
+                <span class="detail-value" style="font-weight: bold; color: #27ae60;">₹${data.metadata.balance.amount.toLocaleString()}</span>
+                <span style="color: #666; font-size: 0.9em;">(${data.metadata.balance.source})</span>
+              </div>
+            ` : ''}
+          </div>
+          <div class="transactions-table">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+              <thead>
+                <tr style="background: #667eea; color: white;">
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Date</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">UTR/Reference</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Type</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Party Name</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Narration</th>
+                  <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">Amount</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Source</th>
+                  <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">PDF Info</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.transactions.map(txn => `
+                  <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; border: 1px solid #ddd;">${formatDate(txn.txn_date)}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${txn.utr_number || '-'}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                      <span class="transaction-type ${txn.credit_debit}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: white; background: ${txn.credit_debit === 'credit' ? '#27ae60' : txn.credit_debit === 'debit' ? '#e74c3c' : '#95a5a6'};">
+                        ${txn.credit_debit.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${txn.rcvd_from_paid_to}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">${txn.narration}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; text-align: right; font-weight: bold;">
+                      ${txn.txn_amount > 0 ? `₹${txn.txn_amount.toLocaleString()}` : '-'}
+                    </td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                      <span style="padding: 2px 6px; border-radius: 4px; font-size: 0.7em; background: #ecf0f1; color: #2c3e50;">
+                        ${txn.source}
+                      </span>
+                    </td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                      ${txn.pdf_attached ? 
+                        `<span style="color: #27ae60; font-weight: bold;">✓ PDF</span><br><small style="color: #666;">${txn.pdf_password_protected ? 'Protected' : 'Open'}</small><br>${txn.pdf_password ? `<span style="font-family: monospace; font-size: 0.8em; background: #f8f9fa; padding: 2px 4px; border-radius: 3px;">${txn.pdf_password}</span>` : ''}` : 
+                        '<span style="color: #95a5a6;">No PDF</span>'
+                      }
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        transactionsList.innerHTML = '<div class="no-data">No transactions found in this file</div>';
       }
       
       dataDisplay.style.display = 'block';
@@ -1332,6 +2012,8 @@
       
       // Switch to fetch tab
       showTab('fetch');
+      // Hide prerequisites message
+      document.getElementById('fetchPrerequisites').style.display = 'none';
     }
 
     // Edit profile
@@ -1435,6 +2117,301 @@
         showStatus('Error: ' + error.message, 'error', 'profilesStatus');
       });
     }
+
+    // Toggle fetch method function
+    function toggleFetchMethod() {
+      const fetchMethod = document.querySelector('input[name="fetchMethod"]:checked').value;
+      const maxEmailsGroup = document.getElementById('maxEmailsGroup');
+      const dateRangeGroup = document.getElementById('dateRangeGroup');
+      const toDateGroup = document.getElementById('toDateGroup');
+      
+      if (fetchMethod === 'count') {
+        maxEmailsGroup.style.display = 'block';
+        dateRangeGroup.style.display = 'none';
+        toDateGroup.style.display = 'none';
+      } else {
+        maxEmailsGroup.style.display = 'none';
+        dateRangeGroup.style.display = 'block';
+        toDateGroup.style.display = 'block';
+      }
+    }
+
+    // Check if user is authenticated
+    function isUserAuthenticated() {
+      // Check if we have a currentUserId and if the user has gone through Google auth
+      return currentUserId !== null;
+    }
+
+    // Fetch and process data function
+    function fetchAndProcessData() {
+      if (!currentUserId) {
+        showStatus('Please set up your profile first. Go to Profile Setup tab and save your profile.', 'error', 'fetchStatus');
+        return;
+      }
+
+      const emailType = document.getElementById('emailType').value;
+      const fetchMethod = document.querySelector('input[name="fetchMethod"]:checked').value;
+      
+      let maxEmails = null;
+      let fromDate = null;
+      let toDate = null;
+      
+      if (fetchMethod === 'count') {
+        maxEmails = parseInt(document.getElementById('maxEmails').value) || 20;
+      } else {
+        fromDate = document.getElementById('fromDate').value;
+        toDate = document.getElementById('toDate').value;
+        
+        if (!fromDate || !toDate) {
+          showStatus('Please select both from and to dates', 'error', 'fetchStatus');
+          return;
+        }
+      }
+      
+      const btn = document.getElementById('fetchAndProcessBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner');
+      
+      // Show spinner and disable button
+      btn.disabled = true;
+      const methodText = fetchMethod === 'count' ? `${maxEmails} emails` : `emails from ${fromDate} to ${toDate}`;
+      btnText.textContent = `Fetching & processing ${emailType} ${methodText}...`;
+      spinner.style.display = 'inline-block';
+      
+                showStatus(`Fetching ${emailType} ${methodText} and processing with Gemini AI... (Batched processing for efficiency)`, 'info', 'fetchStatus');
+
+      fetch('/api/fetch-emails-enhanced', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUserId,
+          maxEmails: maxEmails,
+          fromDate: fromDate,
+          toDate: toDate,
+          emailType: emailType
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Please authenticate with Google first. Click "Subscribe with Google" to login.');
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          let statusMessage = `Successfully fetched ${data.data.emails.length} emails and saved to ${data.filename}`;
+          if (data.geminiData) {
+            const processingMethod = data.geminiData.metadata.geminiProcessingSuccess ? 'Gemini AI' : 'Basic Processing (Gemini rate limited)';
+            statusMessage += `, processed ${data.geminiData.metadata.total_transactions} transactions with ${processingMethod}`;
+          }
+          showStatus(statusMessage, 'success', 'fetchStatus');
+          // Switch to view tab
+          showTab('view');
+          setTimeout(() => loadTransactions(), 1000);
+        } else {
+          showStatus(data.error || 'Failed to fetch and process emails', 'error', 'fetchStatus');
+        }
+      })
+      .catch(error => {
+        showStatus('Error: ' + error.message, 'error', 'fetchStatus');
+      })
+      .finally(() => {
+        // Hide spinner and re-enable button
+        btn.disabled = false;
+        btnText.textContent = 'Fetch & Process with Gemini AI';
+        spinner.style.display = 'none';
+      });
+    }
+
+    // Delete all data function
+    function deleteAllData() {
+      if (!confirm('Are you sure you want to delete ALL data? This will permanently remove:\n\n• All PDF attachments\n• All email data files\n• All transaction files\n\nThis action cannot be undone!')) {
+        return;
+      }
+
+      const btn = document.querySelector('button[onclick="deleteAllData()"]');
+      const btnText = btn.querySelector('.btn-text');
+      
+      // Show loading state
+      btn.disabled = true;
+      btnText.textContent = '🗑️ Deleting...';
+      
+      showStatus('Deleting all stored data...', 'info', 'fetchStatus');
+
+      fetch('/api/delete-all-data', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showStatus(`Successfully deleted ${data.deletedCount} files`, 'success', 'fetchStatus');
+          // Refresh the view tab if it's open
+          if (document.getElementById('viewTab').style.display !== 'none') {
+            setTimeout(() => {
+              loadPureData();
+              loadGeminiData();
+            }, 1000);
+          }
+        } else {
+          showStatus(data.error || 'Failed to delete data', 'error', 'fetchStatus');
+        }
+      })
+      .catch(error => {
+        showStatus('Error: ' + error.message, 'error', 'fetchStatus');
+      })
+      .finally(() => {
+        // Reset button state
+        btn.disabled = false;
+        btnText.textContent = '🗑️ Delete All Data';
+      });
+    }
+
+    // Load PDF attachments function
+    function loadPDFAttachments() {
+      const btn = document.getElementById('loadPDFsBtn');
+      const btnText = btn.querySelector('.btn-text');
+      const spinner = btn.querySelector('.spinner');
+      
+      // Show spinner and disable button
+      btn.disabled = true;
+      btnText.textContent = 'Loading PDF attachments...';
+      spinner.style.display = 'inline-block';
+      
+      showStatus('Loading PDF attachments...', 'info', 'pdfsStatus');
+      
+      fetch('/api/pdf-attachments')
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 401) {
+              throw new Error('Please authenticate with Google first. Click "Subscribe with Google" to login.');
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            displayPDFsList(data.files);
+            showStatus(`Loaded ${data.files.length} PDF attachments`, 'success', 'pdfsStatus');
+          } else {
+            showStatus(data.error || 'Failed to load PDF attachments', 'error', 'pdfsStatus');
+          }
+        })
+        .catch(error => {
+          showStatus('Error: ' + error.message, 'error', 'pdfsStatus');
+        })
+        .finally(() => {
+          // Hide spinner and re-enable button
+          btn.disabled = false;
+          btnText.textContent = 'Load PDF Attachments';
+          spinner.style.display = 'none';
+        });
+    }
+
+    // Display PDFs list
+    function displayPDFsList(files) {
+      const pdfsListDiv = document.getElementById('pdfsList');
+      const pdfsSection = document.getElementById('pdfsSection');
+      
+      if (files.length === 0) {
+        pdfsListDiv.innerHTML = '<div class="no-data">No PDF attachments found. Fetch some emails with PDF attachments first!</div>';
+      } else {
+        pdfsListDiv.innerHTML = files.map(file => {
+          const passwordDisplay = file.isProtected ? 
+            `<div class="password-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ffc107;">
+              <strong>🔒 Password Protected:</strong> ${file.password || 'Password not available'}
+            </div>` : 
+            `<div class="password-info" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+              <strong>🔓 No Password Required</strong>
+            </div>`;
+          
+          return `
+            <div class="file-card">
+              <div class="file-name">${file.filename}</div>
+              <div class="file-info">
+                <div>Created: ${new Date(file.created).toLocaleString()}</div>
+                <div>Modified: ${new Date(file.modified).toLocaleString()}</div>
+              </div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+              ${passwordDisplay}
+              <div class="button-group" style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="viewPDF('${file.filename}')" style="font-size: 0.9em; padding: 8px 15px;">
+                  View PDF
+                </button>
+                <button class="btn btn-success" onclick="downloadPDF('${file.filename}')" style="font-size: 0.9em; padding: 8px 15px;">
+                  Download
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      pdfsSection.style.display = 'block';
+    }
+
+    // View PDF function
+    function viewPDF(filename) {
+      const url = `/api/pdf-attachments/${filename}`;
+      window.open(url, '_blank');
+    }
+
+    // Download PDF function
+    function downloadPDF(filename) {
+      const url = `/api/pdf-attachments/${filename}`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Debug PDF detection function
+    function debugPDFDetection(emailId) {
+      console.log(`Debugging PDF detection for email: ${emailId}`);
+      
+      fetch('/api/debug-pdf-detection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          emailId: emailId
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Please authenticate with Google first. Click "Subscribe with Google" to login.');
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          console.log('PDF Detection Debug Results:', data);
+          alert(`PDF Detection Debug Results:\n\nEmail: ${data.subject}\nFrom: ${data.from}\nPDF Attachments Found: ${data.pdfAttachments.length}\n\nPayload Structure:\n- MIME Type: ${data.payloadStructure.mimeType}\n- Has Parts: ${data.payloadStructure.hasParts}\n- Parts Count: ${data.payloadStructure.partsCount}\n\nCheck browser console for detailed logs.`);
+        } else {
+          alert('Debug failed: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Debug error:', error);
+        alert('Debug error: ' + error.message);
+      });
+    }
+
+
 
     // Load stored form data on page load
     window.addEventListener('load', function() {
